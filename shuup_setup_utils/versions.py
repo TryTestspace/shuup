@@ -57,7 +57,7 @@ def _remove_git_file_if_invalid(git_file_path):
 
 
 def _get_version_from_git(version, root):
-    tag_name = 'v' + version.split('.post')[0].split('.dev')[0]
+    tag_name = 'ai/v' + version.split('.post')[0].split('.dev')[0]
     describe_cmd = ['git', 'describe', '--dirty', '--match', tag_name]
     try:
         described = subprocess.check_output(describe_cmd, cwd=root)
