@@ -47,8 +47,8 @@ patch_for_introspection()
 
 # -- General configuration ------------------------------------------------
 
-project = 'Shuup'
-copyright = '2017, Shoop Commerce Ltd.'
+project = 'Shuup AI'
+copyright = '2017, Anders Innovations and Shoop Commerce Ltd.'
 
 extensions = [
     'djangodocs',
