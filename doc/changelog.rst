@@ -9,6 +9,9 @@ Unrealeased
   When releasing next version, the "Unreleased" header will be replaced
   with appropriate version header and this help text will be removed.
 
+Shuup AI 2.0.0 Alpha/Beta/RC
+----------------------------
+
 Core
 ~~~~
 
