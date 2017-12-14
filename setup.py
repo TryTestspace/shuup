@@ -40,7 +40,7 @@ VERSION_FILE = os.path.join(TOPDIR, 'shuup', '_version.py')
 #      - Add ".post0.dev" suffix to VERSION variable here
 
 NAME = 'shuup-ai'
-VERSION = '2.0.0b1.post0.dev'
+VERSION = '2.0.0b2'
 DESCRIPTION = 'E-Commerce Platform'
 AUTHOR = 'Shoop Commerce Ltd.'
 AUTHOR_EMAIL = 'shuup@shuup.com'
