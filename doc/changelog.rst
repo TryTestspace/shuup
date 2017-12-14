@@ -9,8 +9,43 @@ Unrealeased
   When releasing next version, the "Unreleased" header will be replaced
   with appropriate version header and this help text will be removed.
 
-Shuup AI 2.0.0 Alpha/Beta/RC
-----------------------------
+Core
+~~~~
+
+- Add signals to hook into ``clean`` method of ``Product`` and ``ShopProduct``
+- Make extra_data and other data fields of basket to be stored too
+- Remove ``shuup_makemigrations`` management command
+
+Admin
+~~~~~
+
+- Fix ``get_model_url`` calls in some product related views
+- Add signals to hook into product model forms cleaning
+
+Front
+~~~~~
+
+- Fix checkout method phase, which broke on last release.
+
+Reports
+~~~~~~~
+
+- Make it possible to specify a description for a report
+
+API
+~~~
+
+- Add option to filter categories by status
+
+General/miscellaneous
+~~~~~~~~~~~~~~~~~~~~~
+
+- Fix migrations regarding missing verbose names and help texts
+
+Shuup AI 2.0.0 Beta 1
+---------------------
+
+Released on 2017-11-29 13:45 +0200.
 
 Core
 ~~~~
