@@ -1,13 +1,15 @@
 Shuup Change Log
 ================
 
-Unrealeased
------------
+Shuup AI 2.0.0 Beta 3
+---------------------
 
-- List all changes after last release here (newer on top).  Each change
-  on a separate bullet point line.  Wrap the file at 79 columns or so.
-  When releasing next version, the "Unreleased" header will be replaced
-  with appropriate version header and this help text will be removed.
+Released on 2017-12-15 14:15 +0200.
+
+General/miscellaneous
+~~~~~~~~~~~~~~~~~~~~~
+
+- Add squashed migrations to all apps
 
 Shuup AI 2.0.0 Beta 2
 ---------------------
