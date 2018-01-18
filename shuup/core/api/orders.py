@@ -23,6 +23,8 @@ from shuup.admin.modules.orders.json_order_creator import JsonOrderCreator
 from shuup.admin.modules.orders.views.edit import encode_address
 from shuup.api.mixins import PermissionHelperMixin, ProtectedModelViewSetMixin
 from shuup.core.api.address import AddressSerializer
+from shuup.core.api.mixins import AvailableOrderMethodsMixin
+from shuup.core.api.refunds import RefundMixin
 from shuup.core.models import (
     Contact, Order, OrderLine, OrderStatus, OrderStatusRole, Payment, Shop
 )
@@ -46,7 +48,7 @@ class PaymentSerializer(serializers.ModelSerializer):
         fields = ("payment_identifier", "amount_value", "description")
 
 
-class OrderSerializer(serializers.ModelSerializer):
+class OrderSerializer(AvailableOrderMethodsMixin, serializers.ModelSerializer):
     lines = OrderLineSerializer(many=True)
     billing_address = AddressSerializer(read_only=True)
     shipping_address = AddressSerializer(read_only=True)
@@ -118,7 +120,36 @@ class OrderStatusChangeMixin(object):
         return self.change_order_status(OrderStatus.objects.get_default_canceled())
 
 
-class OrderViewSet(PermissionHelperMixin, ProtectedModelViewSetMixin, OrderStatusChangeMixin, ModelViewSet):
+class OrderTaxesMixin(object):
+    @detail_route(methods=['get'])
+    def taxes(self, request, pk=None):
+        """
+        Get taxes for order
+        """
+        from shuup.core.api.tax import OrderLineTaxSerializer, TaxSummarySerializer
+        order = self.get_object()
+        tax_summary = order.get_tax_summary()
+        rows = [row.to_dict() for row in tax_summary if row.tax_id]
+        serializer = TaxSummarySerializer(data=rows, many=True)
+        serializer.is_valid(True)
+        lines = []
+        for line in order.lines.filter(taxes__isnull=False):
+            taxes = line.taxes.all()
+            ts = OrderLineTaxSerializer(taxes, many=True, context=self.get_serializer_context())
+            for row in ts.data:
+                lines.append(row)
+        return Response({
+            "summary": serializer.validated_data,
+            "lines": lines
+        })
+
+
+class OrderViewSet(PermissionHelperMixin,
+                   ProtectedModelViewSetMixin,
+                   OrderTaxesMixin,
+                   OrderStatusChangeMixin,
+                   RefundMixin,
+                   ModelViewSet):
     """
     retrieve: Fetches an order by its ID.
 
@@ -228,7 +259,7 @@ class OrderViewSet(PermissionHelperMixin, ProtectedModelViewSetMixin, OrderStatu
         """ Set the order as Fully Paid. """
         order = self.get_object()
         if order.is_paid():
-            return Response({"status": "order is already fully paid"})
+            return Response({"error": _("Order is already fully paid")})
 
         request.data["currency"] = order.currency
         request.data["amount_value"] = (order.taxful_total_price_value - order.get_total_paid_amount().value)
@@ -237,13 +268,12 @@ class OrderViewSet(PermissionHelperMixin, ProtectedModelViewSetMixin, OrderStatu
 
 def _handle_payment_creation(request, order):
     serializer = PaymentSerializer(data=request.data)
-    if serializer.is_valid():
-        data = serializer.validated_data
-        order.create_payment(
-            Money(data["amount_value"], order.currency),
-            data["payment_identifier"],
-            data.get("description", "")
-        )
-        return Response({'status': 'payment created'}, status=status.HTTP_201_CREATED)
-    else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.is_valid(raise_exception=True)
+
+    data = serializer.validated_data
+    order.create_payment(
+        Money(data["amount_value"], order.currency),
+        data["payment_identifier"],
+        data.get("description", "")
+    )
+    return Response({"success": _("Payment created")}, status=status.HTTP_201_CREATED)

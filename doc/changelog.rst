@@ -57,6 +57,7 @@ Released on 2017-11-29 13:45 +0200.
 Core
 ~~~~
 
+- Enable refunds for order API
 - API: Improved suppliers stock endpoints
 - Add setting to manage contacts per shop
 - Add ``ShuupMiddleware`` to set the current request shop

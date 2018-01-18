@@ -297,7 +297,7 @@ class OrderQuerySet(models.QuerySet):
 class Order(MoneyPropped, models.Model):
     # Identification
     shop = UnsavedForeignKey("Shop", on_delete=models.PROTECT, verbose_name=_('shop'))
-    created_on = models.DateTimeField(auto_now_add=True, editable=False, verbose_name=_('created on'))
+    created_on = models.DateTimeField(auto_now_add=True, editable=False, db_index=True, verbose_name=_('created on'))
     modified_on = models.DateTimeField(auto_now=True, editable=False, db_index=True, verbose_name=_('modified on'))
     identifier = InternalIdentifierField(unique=True, db_index=True, verbose_name=_('order identifier'))
     # TODO: label is actually a choice field, need to check migrations/choice deconstruction
@@ -827,12 +827,14 @@ class Order(MoneyPropped, models.Model):
         self.update_payment_status()
         refund_created.send(sender=type(self), order=self, refund_lines=refund_lines)
 
-    def create_full_refund(self, restock_products=False):
+    def create_full_refund(self, restock_products=False, created_by=None):
         """
         Create a full for entire order contents, with the option of
         restocking stocked products.
 
         :param restock_products: Boolean indicating whether to restock products
+        :param created_by: Refund creator's user instance, used for
+                           adjusting supplier stock.
         :type restock_products: bool|False
         """
         if self.has_refunds():
@@ -844,7 +846,7 @@ class Order(MoneyPropped, models.Model):
             "amount": line.taxful_price.amount,
             "restock_products": restock_products
         } for line in self.lines.all() if line.type != OrderLineType.REFUND]
-        self.create_refund(line_data)
+        self.create_refund(line_data, created_by)
 
     def get_total_refunded_amount(self):
         total = sum([line.taxful_price.amount.value for line in self.lines.refunds()])
@@ -855,6 +857,11 @@ class Order(MoneyPropped, models.Model):
 
     def get_total_unrefunded_quantity(self):
         return sum([line.max_refundable_quantity for line in self.lines.all()])
+
+    def get_total_tax_amount(self):
+        return sum(
+            (line.tax_amount for line in self.lines.all()),
+            Money(0, self.currency))
 
     def has_refunds(self):
         return self.lines.refunds().exists()
@@ -1084,6 +1091,36 @@ class Order(MoneyPropped, models.Model):
         for attr in name_attrs:
             if getattr(self, "%s_id" % attr):
                 return getattr(self, attr).name
+
+    def get_available_shipping_methods(self):
+        """
+        Get available shipping methods.
+
+        :rtype: list[ShippingMethod]
+        """
+        from shuup.core.models import ShippingMethod
+
+        product_ids = self.lines.products().values_list("id", flat=True)
+        return [
+            m for m
+            in ShippingMethod.objects.available(shop=self.shop, products=product_ids)
+            if m.is_available_for(self)
+        ]
+
+    def get_available_payment_methods(self):
+        """
+        Get available payment methods.
+
+        :rtype: list[PaymentMethod]
+        """
+        from shuup.core.models import PaymentMethod
+
+        product_ids = self.lines.products().values_list("id", flat=True)
+        return [
+            m for m
+            in PaymentMethod.objects.available(shop=self.shop, products=product_ids)
+            if m.is_available_for(self)
+        ]
 
 
 OrderLogEntry = define_log_model(Order)
