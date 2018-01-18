@@ -1,6 +1,57 @@
 Shuup Change Log
 ================
 
+Shuup AI 2.0.0 Beta 4
+---------------------
+
+Released on 2018-01-18 11:55 +0200.
+
+- Report: consider timezone in sales per hour report
+- Report: consider timezone in sales report
+- Remove custom product price when adding to basket
+- Fix report timezones
+- Enable available payments on order api
+- Admin: Add form field for main products
+- Basket API: Allow re-order for anonymous customers
+- Enable refunds for order API
+- Fix browser tests
+- Enable tests for migrations for Django 1.8 and 1.9
+- Fix tests with Currencies when running with migrations
+- Fix migration issues with managers
+- campaigns: Fix the squashed migration
+- Add and fix tests
+- Save anonymous identifier in basket customer and orderer
+- Fix problem in notify script editor ui
+- Update base translation files
+- core/api/basket: Fix message to be translatable
+- doc: Regenerate API docs
+- Fix return type of get_total_tax_amount
+- Update migration verbose names and help texts
+- Fix possible issue with empty tax
+- Add taxful and taxless prices to order api
+- Fix issue with required fields
+- Fix issue with serializer not having context
+- Fix the migrations test
+- Added order.created_on database index
+- Order API: get tax summary
+- Expose taxless total price of products
+- Fix issue with HourCondition
+- Basket: Add Tax Summary
+- Add and fix more tests
+- Move permission validation to basket command
+- Add validations in set_customer basket command
+- Filter serializer foreign objects
+- Make front basket fallback to request customer
+- Added and fixed tests
+- API: fixed and improved abandoned route to use a serialzier
+- API: avoid serializing the basket customer when AnonymousContact
+- API: consider the customer when creating the basket
+- Core: Add basket refresh lines method
+- Core: make it possible to set the basket customer
+- Campaigns: Fix bug in hourly conditions
+- API: Fix bug in order orderer
+- API: add more tax info for product and basket
+
 Shuup AI 2.0.0 Beta 3
 ---------------------
 
@@ -57,7 +108,6 @@ Released on 2017-11-29 13:45 +0200.
 Core
 ~~~~
 
-- Enable refunds for order API
 - API: Improved suppliers stock endpoints
 - Add setting to manage contacts per shop
 - Add ``ShuupMiddleware`` to set the current request shop
